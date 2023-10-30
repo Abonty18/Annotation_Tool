@@ -27,6 +27,8 @@ class ReviewAnnotator(QMainWindow):
         self.setGeometry(100, 100, 1000, 800)
         self.current_file = None  # Track the currently loaded file
         self.temp_file = None  # Track the associated temp file
+        self.index = -1 #for header
+        self.data=list()
         self.initUI()
 
     def load_data(self):
@@ -127,8 +129,9 @@ class ReviewAnnotator(QMainWindow):
         self.annotation_group.setExclusive(
             True
         )  # Make the radio buttons mutually exclusive
-
+        
         # Create radio buttons and add them to the group
+        
         self.radio_button_0 = QRadioButton("0", self)
         self.radio_button_1 = QRadioButton("1", self)
         self.radio_button_2 = QRadioButton("2", self)
@@ -145,100 +148,155 @@ class ReviewAnnotator(QMainWindow):
         self.radio_button_2.setStyleSheet(
             "font-size: 16px;font-family: Times New Roman ;padding: 3px;font-weight:bold; "
         )
-
+        
         radio_button_layout = QHBoxLayout()
         radio_button_layout.addWidget(self.radio_button_0)
         radio_button_layout.addWidget(self.radio_button_1)
         radio_button_layout.addWidget(self.radio_button_2)
         right_layout.addLayout(radio_button_layout)
-
-       
-
-        # add_file_button = QPushButton("Add File", self)
-        # add_file_button.clicked.connect(self.load_excel_file)
-        # right_layout.addWidget(add_file_button)
-        
-        self.show_next_review()
+        # radio_button_layout.setEnabled(False)
 
         # Create a horizontal layout for "Previous" and "Next" buttons
         button_layout = QHBoxLayout()
 
-        next_button = QPushButton("Next>>", self)
-        previous_button = QPushButton("<<Previous", self)
-        next_button.clicked.connect(self.show_next_review)
-        previous_button.clicked.connect(self.show_previous_review)
-        button_layout.addWidget(previous_button)
-        button_layout.addWidget(next_button)
+        self.next_button = QPushButton("Next>>", self)
+        self.previous_button = QPushButton("<<Previous", self)
+        # self.next_button.clicked.connect(self.show_next_review)
+        # self.previous_button.clicked.connect(self.show_previous_review)
+        self.next_button.clicked.connect(self.next_review)
+        self.previous_button.clicked.connect(self.previous_review)
+        button_layout.addWidget(self.previous_button)
+        button_layout.addWidget(self.next_button)
+        # self.next_review()
 
         right_layout.addLayout(button_layout)
 
-        next_button.setStyleSheet(
+        self.next_button.setStyleSheet(
             "font-size: 16px; background-color: #4CAF50; font-family: Poppins; padding: 5px; color: white; font-weight: bold;"
         )
-        previous_button.setStyleSheet(
+        self.previous_button.setStyleSheet(
             "font-size: 16px; background-color: #4CAF50; font-family: Poppins; padding: 5px; color: white; font-weight: bold"
         )
-        save_button = QPushButton("Save Progress", self)
-        save_button.clicked.connect(self.save_progress)
-        right_layout.addWidget(save_button)
-        save_button.setStyleSheet(
+        self.save_button = QPushButton("Save Progress", self)
+        self.save_button.clicked.connect(self.save_progress)
+        right_layout.addWidget(self.save_button)
+        self.save_button.setStyleSheet(
             "font-size: 16px; background-color: #008CBA;font-family: Poppins ;padding: 5px; color: white;font-weight:bold;"
         )
+        
+        self.radio_button_0.setEnabled(False)
+        self.radio_button_1.setEnabled(False)
+        self.radio_button_2.setEnabled(False)
+        self.next_button.setEnabled(False)
+        self.previous_button.setEnabled(False)
+        self.save_button.setEnabled(False)
 
-    def show_previous_review(self):
-        if hasattr(self, "data") and hasattr(self, "temp_data"):
-            while (
-                self.index > 0
-                and self.data.columns[0] in self.temp_data["review"].values
-            ):
-                self.index -= 1
+    def next_review(self):
+        
+        if self.index <=len(self.data)-1:
+            self.next_button.setEnabled(True)
+        else:
+            self.next_button.setEnabled(False) 
 
-            if self.index >= 0:
-                self.index -= 1  # Go to the previous review
+        if self.next_button.isEnabled():
+            self.index=self.index+1
+            print('index next ',self.index)
+            
+            if hasattr(self, "data") and hasattr(self, "temp_data"):
+                
+                
+                # Increment the index
+                while self.index < len(self.data):
+                    review = self.data.iloc[self.index, 0]
+                    if review not in self.temp_data["review"].values:
+                        break
+
+                if self.index < len(self.data):
+                    review = self.data.iloc[self.index, 0]
+                    self.review_text.clear()
+                    self.review_text.insertPlainText(review)
+
+                    # Check if any radio button is selected
+                    annotation = self.annotation_group.checkedId()
+                    if annotation == -1:
+                        annotation = 0  # Set a default value if none is selected
+
+                    # Update the annotation for the previous review
+                    
+                    prev_review = self.data.iloc[self.index-1, 0]
+                    # self.temp_data.loc[self.temp_data["review"] == prev_review, "annotation"] = annotation
+                    self.temp_data.loc[self.index,'review']=review
+                    self.temp_data.loc[self.index,'annotation']=annotation
+                    print(self.temp_data)
+                    # Uncheck all radio buttons
+                    for button_id in [0, 1, 2]:
+                        self.annotation_group.button(button_id).setChecked(False)
+                else:
+                    QMessageBox.information(self, "Info", "All reviews annotated!")
+                    self.save_progress()
+
+    # def previous_review(self):
+    #     if self.index <= 0:
+    #         self.previous_button.setEnabled(False)
+    #         # self.next_button.setEnabled(True)
+    #     else:
+    #         self.previous_button.setEnabled(True)
+    #         # self.next_button.setEnabled(True)
+
+    #     if self.previous_button.isEnabled():
+    #         self.index = self.index - 1
+    #         print('index prev', self.index)
+
+    #         if hasattr(self, "data") and hasattr(self, "temp_data"):
+    #             while self.index >= 0:
+    #                 review = self.data.iloc[self.index, 0]
+
+    #                 if review not in self.temp_data["review"].values:
+    #                     break
+
+    #             if self.index >= 0:
+    #                 review = self.data.iloc[self.index, 0]
+    #                 self.review_text.clear()
+    #                 self.review_text.insertPlainText(review)
+
+    #                 # Retrieve the annotation for this review or set a default value
+    #                 annotation = self.temp_data[self.temp_data["review"] == review][
+    #                     "annotation"
+    #                 ].values
+    #                 if len(annotation) > 0:
+    #                     self.annotation_group.button(annotation[0]).setChecked(True)
+    #                 else:
+    #                     # Set a default value (e.g., 0) or uncheck all radio buttons
+    #                     # self.annotation_group.button(0).setChecked(True)  # Default to 0
+    #                     for button_id in [0, 1, 2]:
+    #                         self.annotation_group.button(button_id).setChecked(False)
+    def previous_review(self):
+        # Decrease the index by 1
+        self.index -= 1
+        print('index prev', self.index)
+
+        if self.index < 0:
+            # If we reached the beginning of the reviews, disable the "Previous" button
+            self.previous_button.setEnabled(False)
+        else:
+            # If we're not at the beginning, enable the "Next" button
+            self.next_button.setEnabled(True)
+
+            if hasattr(self, "data") and hasattr(self, "temp_data"):
                 review = self.data.iloc[self.index, 0]
                 self.review_text.clear()
                 self.review_text.insertPlainText(review)
 
-                # Retrieve the annotation for this review
+                # Retrieve the annotation for this review or set a default value
                 annotation = self.temp_data[self.temp_data["review"] == review][
                     "annotation"
                 ].values
                 if len(annotation) > 0:
                     self.annotation_group.button(annotation[0]).setChecked(True)
                 else:
-                    # Uncheck all radio buttons in the group
+                    # Set a default value (e.g., 0) or uncheck all radio buttons
                     for button_id in [0, 1, 2]:
                         self.annotation_group.button(button_id).setChecked(False)
-
-    def show_next_review(self):
-        if hasattr(self, "data") and hasattr(self, "temp_data"):
-            while self.index < len(self.data):
-                review = self.data.iloc[self.index, 0]
-                if review not in self.temp_data["review"].values:
-                    break
-                self.index += 1
-
-            if self.index < len(self.data):
-                review = self.data.iloc[self.index, 0]
-                self.review_text.clear()
-                self.review_text.insertPlainText(review)
-
-                # Check if any radio button is selected
-                annotation = self.annotation_group.checkedId()
-                if annotation == -1:
-                    annotation = 0  # Set a default value if none is selected
-
-                # Update the annotation for the current review
-                self.temp_data.loc[self.temp_data.shape[0]] = [review, annotation]
-
-                # Uncheck all radio buttons
-                for button_id in [0, 1, 2]:
-                    self.annotation_group.button(button_id).setChecked(False)
-            else:
-                QMessageBox.information(self, "Info", "All reviews annotated!")
-                self.save_progress()
-
-
 
 
 
@@ -256,13 +314,34 @@ class ReviewAnnotator(QMainWindow):
             self.temp_file = f"temp_{os.path.basename(file_path)}"
             self.load_data()
             self.load_temp_data()
-            self.index = -1
-            self.show_next_review()
+        
+            self.radio_button_0.setEnabled(True)
+            self.radio_button_1.setEnabled(True)
+            self.radio_button_2.setEnabled(True)
+            self.next_button.setEnabled(True)
+            self.previous_button.setEnabled(True)
+            self.save_button.setEnabled(True)
+
+            # Find the first unannotated review, or start from the beginning
+            if not self.temp_data.empty:
+                unannotated_reviews = self.data[~self.data['review'].isin(self.temp_data['review'])]
+                if not unannotated_reviews.empty:
+                    self.index = unannotated_reviews.index[-1]
+                else:
+                    self.index = -1  # If all reviews are annotated, start from the beginning
+            else:
+                self.index = -1  # If no temp data exists, start from the beginning
+
+            self.next_review()
             QMessageBox.information(self, "Info", "File loaded successfully")
+
+
 
     def save_progress(self):
         self.temp_data.to_excel(self.temp_file, index=False)
         QMessageBox.information(self, "Info", "Progress saved to temp_reviews.xlsx")
+        
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
