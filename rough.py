@@ -17,6 +17,9 @@ from PyQt5.QtWidgets import (
     QSplitter,
     QFileDialog,
 )
+from text_processing import highlight_privacy_keywords
+# Additional import for directory handling
+import pathlib
 
 
 class ReviewAnnotator(QMainWindow):
@@ -29,6 +32,7 @@ class ReviewAnnotator(QMainWindow):
         self.temp_file = None  # Track the associated temp file
         self.index = -1 #for header
         self.data=list()
+        self.privacy_keywords = ['information', 'service', 'personal', 'may', 'privacy', 'pocketguard', 'use', 'policy', 'account', 'party', 'data', 'third', 'financial', 'right', 'thirdparty', 'collect', 'user', 'provide', 'access', 'bank', 'request', 'collected', 'please', 'advisor', 'also', 'consent', 'device', 'law', 'processing', 'protection']
         self.initUI()
 
     def load_data(self):
@@ -46,6 +50,29 @@ class ReviewAnnotator(QMainWindow):
         else:
             self.temp_data = pd.DataFrame(columns=["review", "annotation"])
 
+    def load_existing_annotations(self):
+        if hasattr(self, "data") and not self.temp_data.empty:
+            unannotated_indexes = set(range(len(self.data))) - set(self.temp_data.index)
+            unannotated_indexes = {x - 1 for x in unannotated_indexes}  # Subtract 1 from each element
+            print("Length of data:", len(self.data))
+            print("Length of temp_data:", len(self.temp_data))
+            print("Unannotated indexes:", unannotated_indexes)
+
+
+            # Check if there are unannotated indexes
+            if unannotated_indexes:
+                self.index = min(unannotated_indexes)
+            else:
+                self.index = -1
+
+            # Handle the case where the first review might be considered nan
+            if self.index == 0:
+                self.index = -1
+                
+
+        self.next_review()
+
+
     def initUI(self):
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
@@ -61,12 +88,12 @@ class ReviewAnnotator(QMainWindow):
         left_section = QTextEdit(self)
         left_section.setReadOnly(True)
         left_section.setStyleSheet(
-            "font-size: 15px; font-family: Times New Roman ; background-color: #e9e9e9;border: 1px solid #f7f7b7; border-radius: 8px;"
+            "font-size: 17px; font-family: Times New Roman ; background-color: #e9e9e9;border: 1px solid #f7f7b7; border-radius: 8px;"
         )
         left_section.setHtml(
             """\
-           <div style="text-align: center;">
-           <span style="font-size: 20px; font-family: Times New Roman ; font-weight: bold; display: block;">Annotation Guideline</span><br>
+        <div style="text-align: center;">
+        <span style="font-size: 20px; font-family: Times New Roman ; font-weight: bold; display: block;">Annotation Guideline</span><br>
             <span style="font-weight: bold;font-size: 16px;">Objective:</span>The goal of the annotation task is to categorize the reviews based on whether they are related to privacy features, privacy bugs, or neither.<br><br>
             <span style="font-weight: bold;font-size: 16px;">Label Categories:</span><br>
             1. Privacy-Related Feature Request (Label 1): Assign this label if the review is discussing a feature request of the app related to user privacy. This could include any mention of data protection, security, user consent, encryption, or other privacy-related features request.<br>
@@ -76,17 +103,43 @@ class ReviewAnnotator(QMainWindow):
             1. Read the Review: Carefully read and understand the content of the review.<br>
             2. Identify Privacy Context: Determine whether the review is discussing any issue related to user privacy. This could include issues about data security, consent, encryption, data sharing, or any other privacy-related topics.<br>
             3. Assign Appropriate Label: Based on the content of the review, assign one of the three labels: 1 (Privacy-Related Feature request), 2 (Privacy-Related Bug), or 0 (Not Privacy-Related).<br><br>
-            4.Examples: Here are some examples to help you understand how to assign the labels:<br>
--If the review is advising or requestiing to update any privacy related feature of the app: Assign Label 1 (Privacy-Related Feature request).<br>
--If the review is reporting that their personal data was exposed due to a bug: Assign Label 2 (Privacy-Related Bug).<br>
--If the review is discussing the app's user interface and has no mention of privacy: Assign Label 0 (Not Privacy-Related).<br><br>
             <span style="font-weight: bold;font-size: 16px;">Examples:</span><br>
-            - If the review is advising or requesting an update of a privacy-related feature: Assign Label 1.<br>
-            - If the review reports that personal data was exposed due to a bug: Assign Label 2.<br>
-            - If the review does not discuss any privacy-related aspects: Assign Label 0.<br>
-            </div>
-        """
-        )
+            <table style="width:100%; border: 1px solid #000; border-collapse: collapse;">
+      <tr>
+        <th style="border: 1px solid #000; padding: 8px;">Review</th>
+        <th style="border: 1px solid #000; padding: 8px;">Annotation Label</th>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #000; padding: 8px;">Read the privacy policy on apps before you put your personal information in. They openly tell you how they collect your information and who they "may" share it with. You are putting your most valuable information into these budgeting apps and if you pay for a service you shouldn't have your information shared. They make money off ads and the $7.99/month you pay for the plus plan.</td>
+        <td style="border: 1px solid #000; padding: 8px;">1</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #000; padding: 8px;">I like it because of its simplicity to use. As others have mentioned, it could be a bit annoying at times when loading your data. It's been some 2 weeks for me and my bank information hasn't updated in PocketGuard.</td>
+        <td style="border: 1px solid #000; padding: 8px;">2</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #000; padding: 8px;">It's a really good app. Great for managing spending and staying on top of your money but for me it's a new app. How do I know how good the security is? I need some sort of proof before I give my financial information to an app.</td>
+        <td style="border: 1px solid #000; padding: 8px;">0</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #000; padding: 8px;">I love this app. Setting up budgets is easy. The only reason I gave it four stars is because I have to go through a lengthy process to connect with my bank account every day that I use the app. That may be an issue with the bank and not the app itself.</td>
+        <td style="border: 1px solid #000; padding: 8px;">0</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #000; padding: 8px;">Added my bank just fine, but then failed to add my PayPal account. When trying to set up my income sources, it didn't even provide an option to "add" any, but instead listed the money deposits from my bank account, assuming those were my only income, and ONLY allowed me to choose from those! So I can't make cash for income? On top of all the INCREDIBLY personal questions it FORCES you to answer to even set it up (net worth, etc), this one is a *HARD PASS.* This app is not good.</td>
+        <td style="border: 1px solid #000; padding: 8px;">2</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #000; padding: 8px;">I like the app but I think it'll be a good idea to have access to our credit card information and be able to connect the popular investment applications like Acorns, Robinhood, etc. Also, if we could pay bills ahead of time through the app that'll be neat too.</td>
+        <td style="border: 1px solid #000; padding: 8px;">1</td>
+      </tr>
+    </table>
+    <br>
+    
+    </div>
+    """
+)
+
         splitter.addWidget(left_section)
         splitter.setSizes([left_width, 0])
         main_layout.addWidget(splitter)
@@ -113,7 +166,7 @@ class ReviewAnnotator(QMainWindow):
         self.review_text = QTextEdit('<div style="text-align: center;font-size: 25px; vertical-align: middle;">Please add a file first to annotate<br><span style="font-size: 90px;">😺</span></div>', self)
 
         self.review_text.setStyleSheet(
-            "font-size: 15px; font-family: Times New Roman ; background-color: #e9e9e9;border: 1px solid #f7f7c6; border-radius: 8px;"
+            "font-size: 17px; font-family: Times New Roman ; background-color: #e9e9e9;border: 1px solid #f7f7c6; border-radius: 8px;"
         )
         right_layout.addWidget(self.review_text)
 
@@ -205,8 +258,9 @@ class ReviewAnnotator(QMainWindow):
 
             if hasattr(self, "data") and hasattr(self, "temp_data"):
                 review = self.data.iloc[self.index, 0]
+                highlighted_review = highlight_privacy_keywords(review, self.privacy_keywords)
                 self.review_text.clear()
-                self.review_text.insertPlainText(review)
+                self.review_text.setHtml(highlighted_review)
 
                 # Retrieve the annotation for this review or set a default value
                 annotation = self.temp_data[self.temp_data["review"] == review]["annotation"].values
@@ -219,77 +273,58 @@ class ReviewAnnotator(QMainWindow):
                         self.annotation_group.button(button_id).setChecked(False)
 
     def next_review(self):
-        if self.index < len(self.data) - 1:
-            if self.index >= 0:
-                # Save the annotation for the current review
-                annotation = self.annotation_group.checkedId()
-                if annotation == -1:
-                    annotation = 0  # Set a default value if none is selected
-                self.temp_data.at[self.index, 'annotation'] = annotation
-
-            self.index = self.index + 1
-            self.previous_button.setEnabled(True)
-
-            if self.index == len(self.data) - 1:
-                self.next_button.setEnabled(False)
-
-            if hasattr(self, "data") and hasattr(self, "temp_data"):
-                review = self.data.iloc[self.index, 0]
-                self.review_text.clear()
-                self.review_text.insertPlainText(review)
-
-                # Check if any radio button is selected
-                annotation = self.annotation_group.checkedId()
-                if annotation == -1:
-                    annotation = 0  # Set a default value if none is selected
-
-                self.temp_data.loc[self.index, 'review'] = review
-                self.temp_data.loc[self.index, 'annotation'] = annotation
-
-                # Uncheck all radio buttons
-                for button_id in [0, 1, 2]:
-                    self.annotation_group.button(button_id).setChecked(False)
-        else:
-            QMessageBox.information(self, "Info", "All reviews annotated!")
-            self.save_progress()
-
-
-    # def next_review(self):
-    #     if self.index < len(self.data) - 1:
-    #         self.index = self.index + 1
-    #         self.previous_button.setEnabled(True)
-
-    #         if self.index == len(self.data) - 1:
-    #             self.next_button.setEnabled(False)
-
-    #         if hasattr(self, "data") and hasattr(self, "temp_data"):
-    #             review = self.data.iloc[self.index, 0]
-    #             self.review_text.clear()
-    #             self.review_text.insertPlainText(review)
-
-    #             # Retrieve the annotation for this review or set a default value
-    #             annotation = self.temp_data[self.temp_data["review"] == review]["annotation"].values
-    #             if len(annotation) > 0:
-    #                 # Set the radio button based on the annotation (as an integer)
-    #                 self.annotation_group.button(int(annotation[0])).setChecked(True)
-    #             else:
-    #                 # Set a default value (e.g., 0) or uncheck all radio buttons
-    #                 for button_id in [0, 1, 2]:
-    #                     self.annotation_group.button(button_id).setChecked(False)
-    
-
-
-    # def update_tempdata(self):
         
-    #     self.temp_data.loc[self.index, 'annotation']=self.annotation_group.checkedButton().text()
-    #     print('in update',self.temp_data)
+        if self.index <=len(self.data)-1:
+            self.next_button.setEnabled(True)
+        else:
+            self.next_button.setEnabled(False) 
+
+        if self.next_button.isEnabled():
+            self.index=self.index+1
+            print('index next ',self.index)
+            
+            if hasattr(self, "data") and hasattr(self, "temp_data"):
+                
+                
+                # Increment the index
+                while self.index < len(self.data):
+                    review = self.data.iloc[self.index, 0]
+                    if review not in self.temp_data["review"].values:
+                        break
+
+                if self.index < len(self.data):
+                    review = self.data.iloc[self.index, 0]
+                    highlighted_review = highlight_privacy_keywords(review, self.privacy_keywords)
+                    self.review_text.clear()
+                    self.review_text.setHtml(highlighted_review)
+
+                    # Check if any radio button is selected
+                    annotation = self.annotation_group.checkedId()
+                    if annotation == -1:
+                        annotation = 0  # Set a default value if none is selected
+
+                    # Update the annotation for the previous review
+                    
+                    prev_review = self.data.iloc[self.index-1, 0]
+                    # self.temp_data.loc[self.temp_data["review"] == prev_review, "annotation"] = annotation
+                    self.temp_data.loc[self.index,'review']=review
+                    self.temp_data.loc[self.index,'annotation']=annotation
+                    print(self.temp_data)
+                    # Uncheck all radio buttons
+                    for button_id in [0, 1, 2]:
+                        self.annotation_group.button(button_id).setChecked(False)
+                else:
+                    QMessageBox.information(self, "Info", "All reviews annotated!")
+                    self.save_progress()
+
+
     def update_tempdata(self):
         if self.index >= 0 and self.index < len(self.data):
             annotation = self.annotation_group.checkedId()
             if annotation == -1:
                 annotation = 0  # Set a default value if none is selected
             self.temp_data.at[self.index, 'annotation'] = annotation
-            print('in update', self.temp_data)
+
 
     def load_excel_file(self):
         options = QFileDialog.Options()
@@ -302,9 +337,14 @@ class ReviewAnnotator(QMainWindow):
         )
         if file_path:
             self.current_file = file_path
-            self.temp_file = f"temp_{os.path.basename(file_path)}"
+            # Specify the folder name
+            folder_name = "Annotated data"
+            # Create the folder if it doesn't exist
+            pathlib.Path(folder_name).mkdir(parents=True, exist_ok=True)
+            self.temp_file = os.path.join(folder_name, f"temp_{os.path.basename(file_path)}")
             self.load_data()
             self.load_temp_data()
+            self.load_existing_annotations()
 
             self.radio_button_0.setEnabled(True)
             self.radio_button_1.setEnabled(True)
@@ -313,18 +353,10 @@ class ReviewAnnotator(QMainWindow):
             self.previous_button.setEnabled(True)
             self.save_button.setEnabled(True)
 
-            # Find the first unannotated review, or start from the beginning
-            if not self.temp_data.empty:
-                unannotated_indexes = set(range(len(self.data))) - set(self.temp_data.index)
-                if unannotated_indexes:
-                    self.index = min(unannotated_indexes)
-                else:
-                    self.index = -1  # If all reviews are annotated, start from the beginning
-            else:
-                self.index = -1  # If no temp data exists, start from the beginning
-
-            self.next_review()
             QMessageBox.information(self, "Info", "File loaded successfully")
+
+
+
     def save_progress(self):
         self.temp_data.to_excel(self.temp_file, index=False)
         QMessageBox.information(self, "Info", "Progress saved to temp_reviews.xlsx")
