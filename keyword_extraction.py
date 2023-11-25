@@ -47,7 +47,7 @@ def preprocess_bengali_text(text):
     return preprocessed_text
 
 # Read the English privacy policy text
-with open('preprocessed_text/preprocessed_privacy_policy.txt', 'r', encoding='utf-8') as file:
+with open('preprocessed_text/preprocessed_privacy_policy_msngr.txt', 'r', encoding='utf-8') as file:
     english_privacy_policy_text = file.read()
 
 
@@ -87,7 +87,7 @@ sorted_english_word_tfidf_scores = {k: v for k, v in sorted(english_word_tfidf_s
 
 # Extract the top 50 keywords from English text (excluding common stopwords)
 english_stop_words = set(stopwords.words('english'))
-top_english_keywords = [word for word in sorted_english_word_tfidf_scores.keys() if word not in english_stop_words][:15]
+top_english_keywords = [word for word in sorted_english_word_tfidf_scores.keys() if word not in english_stop_words][:25]
 
 
 print("\nTop 50 English Keywords:")

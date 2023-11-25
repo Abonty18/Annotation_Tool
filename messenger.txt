@@ -1,0 +1,120 @@
+
+Messenger
+FeaturesDesktop AppPrivacy & SafetyFor Developers
+Connect with confidence
+Connect with confidence
+Open up as you are – privately, safely, confidently
+You deserve a private and safe messaging experience, where you can express yourself the way you want to the people you want.
+
+Icon for SETTINGS section
+SETTINGS
+Icon for BLOCK section
+BLOCK
+Icon for REPORT section
+REPORT
+Icon for SAFETY NOTICES section
+SAFETY NOTICES
+Icon for APP LOCK section
+APP LOCK
+Icon for END-TO-END ENCRYPTION section
+END-TO-END ENCRYPTION
+Your Messenger, your way.
+You decide who reaches your Chats list, who goes to your Message Request folder, and who can’t message or call you at all. Privacy settings let you control message delivery, blocked contacts, App lock, Secret Conversations, story audience and muted stories in one place.
+
+Learn More
+Stop unwanted messages or calls.
+If someone’s bothering you, you can block them and any new account they create. We won’t tell them they’re blocked.
+
+Learn More
+Help us keep the community safe.
+If you come across possible harmful content or behavior, such as harassment or impersonation, please report it. If we see that it violates our Community Standards, we’ll take appropriate action, which could include disabling their account or limiting their ability to send messages.
+
+Learn More
+Knowledge when you need it.
+Brief pop-ups in your chats help you spot suspicious activity and take action if something isn’t right so you can avoid harmful interactions and possible scams.
+
+Learn More
+Keep it extra secure.
+If you’re looking for more security, opt in to App Lock. Use your device's face or fingerprint ID to unlock Messenger, giving you extra protection for your chats.
+
+*Available on iOS only
+Learn More
+Opt-in to end-to-end encrypted chats and calls.
+When you want to add a layer of privacy and security, you can choose to send end-to-end encrypted messages or make end-to-end encrypted calls. That means that messages and calls can only be seen or heard by you and the person you send them to, and no one else - not even us - can access those chats, unless you report them to us. As part of our commitment to privacy, Messenger will become end-to-end encrypted by default.
+
+Learn More
+Privacy Image
+KEEPING YOUR INFORMATION SAFE
+Your messages are your messages.
+We want you to know what information we collect and how we use it. We don’t use the content of your messages with other people for ad targeting, which means advertisers can’t target you based on what you say in messages. As with other parts of Facebook, we collect information from Messenger primarily to provide the service, improve the product experience, and keep people safe and secure.
+
+Learn More
+BUILT WITH SAFETY BY DESIGN
+Messenger has tools to help keep you safe and in control of your own experience.
+Messenger’s approach to safer private messaging:
+
+Preventing harm
+at the source
+Preventing harm from happening in the first place is the best way to keep people safe.
+
+Giving you more choice and control
+In addition to our efforts to prevent harm, we are giving you more control of your messaging inbox to account for the variety of experiences you want.
+
+Responding
+with care
+When we become aware of potential abuse on our services, we respond. We do this by enforcing our Community Standards, sharing data with NCMEC and our law enforcement agencies.
+
+HELPING TO KEEP YOU SAFE
+Messenger helps to keep you safe online.
+That’s why we’re constantly working to stop malicious activity before it reaches you.
+
+Here are the ways we work to protect your safety on Messenger:
+
+
+Reduce unwanted interactions
+We filter potentially harmful messages so they don’t reach your inbox. Safety notices may pop up in your chats to help you spot potential scams or imposters, and we detect and block millions of fake accounts on Facebook every day.
+
+
+Control who you let in
+Messenger continuously innovates to protect you from harm, and tools like multi block help you control your experience. You decide who reaches your Chats list, who goes to your Message Request folder, and who can’t message or call you at all.
+
+
+Reduce the spread of misinformation
+To help reduce the spread of viral misinformation and harmful content, we limit the number of chats a message can be forwarded to at one time. We also have additional protections in place for content that has been identified as misinformation on Facebook and shared directly into Messenger. For more information, see How Facebook Protects Elections.
+
+
+Foster a safer community
+If you come across possible harmful content or behavior, such as harassment or impersonation, please report it. If we see that it violates our Community Standards, we’ll take appropriate action, which could include disabling their account or limiting their ability to send messages.
+
+
+Enhance safeguards for minors
+Keeping minors safe on our platforms is one of our greatest responsibilities. Automatically, we provide enhanced safety features for minors such as limiting who can message them and how they can be found in search, and offer them education and resources. We also use machine learning to detect and disable accounts who are engaging in inappropriate interactions with children.
+
+
+Review and enforce
+Reporting is an essential tool for responding to abuse effectively and preventing further harm. Reports are prioritized based on the severity of harm, which allows us to respond quickly to issues like exploitation or child safety.
+
+Whitepapers
+For in-depth, technical explanation of our tools and techniques, you can find our downloadable whitepapers here:
+
+Messenger Secret Conversations: Technical Whitepaper
+
+Meta's Approach to Safer Private Messaging on Messenger and Instagram Direct Messaging
+
+Independent Assessment: Expanding End-to-End Encryption Protects Fundamental Human Rights
+
+
+Additional resources
+Messenger Kids
+Privacy & Security on Facebook
+Facebook Safety Center
+Facebook Terms and Policies
+Messenger and Coronavirus
+Contact Uploading & Non-Users
+© Meta 2023.
+The Apple and Google Play logos are trademarks of their respective owners.
+Privacy Policy
+Cookie Policy
+Terms
+English (US)
+From Meta Logo

@@ -38,7 +38,7 @@ def preprocess_privacy_policy(text):
     return preprocessed_text
 
 # Path to your privacy policy text file
-privacy_policy_path = 'pocketguard.txt'
+privacy_policy_path = 'messenger.txt'
 
 # Read the privacy policy text
 with open(privacy_policy_path, 'r', encoding='utf-8') as file:
@@ -53,7 +53,7 @@ if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 
 # Save the preprocessed privacy policy text
-output_file_path = os.path.join(output_folder, 'preprocessed_privacy_policy.txt')
+output_file_path = os.path.join(output_folder, 'preprocessed_privacy_policy_msngr.txt')
 with open(output_file_path, 'w', encoding='utf-8') as file:
     file.write(preprocessed_privacy_policy)
 
